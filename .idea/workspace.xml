@@ -1,19 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="535be60e-f2a0-42b6-a0c4-2802fdeb6057" name="Changes" comment="" />
+    <list default="true" id="535be60e-f2a0-42b6-a0c4-2802fdeb6057" name="Changes" comment="Add initial implementation for patch change detection and visualization">
+      <change afterPath="$PROJECT_DIR$/objects/object_filtering.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/objects/object_matching.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/objects/object_visualization.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/objects/polygon_features.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/patch_approach/main_patch.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/patch_approach/patches.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/segmentation/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/segmentation/mask_postprocess.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/segmentation/polygonize.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/segmentation/sam_segment.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/cache_io.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/geometry.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/rasterize.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Sinkhorn for change detection.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Sinkhorn for change detection.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/embeddings.py" beforeDir="false" afterPath="$PROJECT_DIR$/embeddings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geotiff_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/geotiff_processing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patches.py" beforeDir="false" afterPath="$PROJECT_DIR$/objects/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sinkhorn.py" beforeDir="false" afterPath="$PROJECT_DIR$/sinkhorn.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_E:/uni/y5s1/MA4198/Sinkhorn for change detection" value="3A9AsmyNl4H9tGQaQCQidwBc5ng" />
+    </persistenceIdMap>
+  </component>
+  <component name="CopilotUserSelectedChatMode">
+    <option name="chatModeId" value="Ask" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="5" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <branch-grouping />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "jean-cq"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/jean-cq/Sinkhorn_for_change_detection.git",
+    "accountId": "b74de3ea-3819-4251-881a-8637cb51505e"
+  }
+}]]></component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 7
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
   <component name="ProjectId" id="3A9AsmyNl4H9tGQaQCQidwBc5ng" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -21,11 +81,31 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.main.executor": "Run",
+    "Python.sinkhorn.executor": "Run",
     "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true"
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "E:/uni/y5s1/MA4198/Sinkhorn for change detection/patch_approach",
+    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\uni\y5s1\MA4198\Sinkhorn for change detection\patch_approach" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\uni\y5s1\MA4198\Sinkhorn for change detection\data\raw" />
+      <recent name="E:\uni\y5s1\MA4198\Sinkhorn for change detection\data\output" />
+      <recent name="E:\uni\y5s1\MA4198\Sinkhorn for change detection\data\cache" />
+      <recent name="E:\uni\y5s1\MA4198\Sinkhorn for change detection\patch_approach" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -41,6 +121,76 @@
       <option name="presentableId" value="Default" />
       <updated>1771994621752</updated>
     </task>
+    <task id="LOCAL-00001" summary="Add initial implementation for patch change detection and visualization">
+      <option name="closed" value="true" />
+      <created>1774861521045</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1774861521045</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="User">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="*" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="master" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Add initial implementation for patch change detection and visualization" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add initial implementation for patch change detection and visualization" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/main.py</url>
+          <line>3</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
   </component>
 </project>

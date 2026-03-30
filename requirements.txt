@@ -1,0 +1,6 @@
+numpy>=1.24,<3.0
+matplotlib>=3.7,<4.0
+rasterio
+torch
+torchvision
+opencv-python

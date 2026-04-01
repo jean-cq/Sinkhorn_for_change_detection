@@ -1,6 +1,3 @@
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
@@ -59,8 +56,8 @@ def overlay_heatmap_on_rgb(img, heatmap, alpha=0.5, show=True):
 
 if __name__ == "__main__":
     t0 = time.perf_counter()
-    img1, meta1 = read_geotiff_rgb("data/raw/NUS_S2_RGB_2020_MayJul.tif")
-    img2, meta2 = read_geotiff_rgb("data/raw/NUS_S2_RGB_2025_MayJul.tif")
+    img1, meta1 = read_geotiff_rgb("../data/raw/NUS_S2_RGB_2020_MayJul_small.tif")
+    img2, meta2 = read_geotiff_rgb("../data/raw/NUS_S2_RGB_2025_MayJul_small.tif")
     img1 = np.nan_to_num(img1, nan=0.0)
     img2 = np.nan_to_num(img2, nan=0.0)
     #
@@ -75,7 +72,7 @@ if __name__ == "__main__":
         raise ValueError(f"Shape mismatch: {img1.shape} vs {img2.shape}")
     t1 = time.perf_counter()
     print(f"[TIME] Read + nan fix: {t1 - t0:.3f}s")
-    PATCH_SIZE = 32
+    PATCH_SIZE = 16
     patches1, XY1, (gh, gw) = extract_patches_nonoverlap(img1, PATCH_SIZE)
     patches2, XY2, _ = extract_patches_nonoverlap(img2, PATCH_SIZE)
     t2 = time.perf_counter()
@@ -94,10 +91,10 @@ if __name__ == "__main__":
 
     if USE_CACHE:
         try:
-            F1 = np.load("data/cache/F1.npy")
-            F2 = np.load("data/cache/F2.npy")
-            XY1 = np.load("data/cache/XY1.npy")
-            XY2 = np.load("data/cache/XY2.npy")
+            F1 = np.load("../data/cache/F1_small.npy")
+            F2 = np.load("../data/cache/F2_small.npy")
+            XY1 = np.load("../data/cache/XY1_small.npy")
+            XY2 = np.load("../data/cache/XY2_small.npy")
             print("[INFO] Loaded cached embeddings and coordinates.")
         except FileNotFoundError:
             # F1 = encode_patches(patches1)
@@ -111,10 +108,10 @@ if __name__ == "__main__":
             # # keep only valid patches
             # F1 = F1_all[keep_mask]
             # F2 = F2_all[keep_mask]
-            np.save("data/cache/F1.npy", F1)
-            np.save("data/cache/F2.npy", F2)
-            np.save("data/cache/XY1.npy", XY1)
-            np.save("data/cache/XY2.npy", XY2)
+            np.save("../data/cache/F1.npy", F1)
+            np.save("../data/cache/F2.npy", F2)
+            np.save("../data/cache/XY1.npy", XY1)
+            np.save("../data/cache/XY2.npy", XY2)
             print("[INFO] Computed and saved embeddings.")
     else:
         # F1 = encode_patches(patches1)
@@ -130,7 +127,7 @@ if __name__ == "__main__":
 
     result = sinkhorn_patch_change(XY1, F1, XY2, F2,
         gate_radius=0.03,
-        eps=0.01,
+        eps=0.0005,
         tau_a=0.5,
         tau_b=0.5,
         n_iters=500,
@@ -147,7 +144,7 @@ if __name__ == "__main__":
         gw,
         fill_value=np.nan
     )
-    np.save("data/output/heatmap.npy", heatmap)
+    np.save("../data/output/heatmap_small_0005.npy", heatmap)
 
     t6 = time.perf_counter()
     print(f"[TIME] Heatmap restore/save: {t6 - t5:.3f}s")

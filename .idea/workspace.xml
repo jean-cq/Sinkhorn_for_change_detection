@@ -4,29 +4,35 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="535be60e-f2a0-42b6-a0c4-2802fdeb6057" name="Changes" comment="Add initial implementation for patch change detection and visualization">
-      <change afterPath="$PROJECT_DIR$/objects/object_filtering.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/objects/object_matching.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/objects/object_visualization.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/objects/polygon_features.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/patch_approach/main_patch.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/patch_approach/patches.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/segmentation/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/segmentation/mask_postprocess.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/segmentation/polygonize.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/segmentation/sam_segment.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/cache_io.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/geometry.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/rasterize.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Sinkhorn for change detection.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Sinkhorn for change detection.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="535be60e-f2a0-42b6-a0c4-2802fdeb6057" name="Changes" comment="Add initial implementation for GeoAI change detection and related utilities">
+      <change afterPath="$PROJECT_DIR$/evaluation.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/evaluation_object.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/evaluation_patch.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/geoai_evaluation/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/geoai_evaluation/geoai_prepare_refs.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/geoai_evaluation/geoai_run.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/show_geoai_probability.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/visualisation_tif.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/embeddings.py" beforeDir="false" afterPath="$PROJECT_DIR$/embeddings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geotiff_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/geotiff_processing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/cache/F1.npy" beforeDir="false" afterPath="$PROJECT_DIR$/data/cache/F1.npy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/cache/F2.npy" beforeDir="false" afterPath="$PROJECT_DIR$/data/cache/F2.npy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/cache/XY1.npy" beforeDir="false" afterPath="$PROJECT_DIR$/data/cache/XY1.npy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/cache/XY2.npy" beforeDir="false" afterPath="$PROJECT_DIR$/data/cache/XY2.npy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/output/heatmap.npy" beforeDir="false" afterPath="$PROJECT_DIR$/data/output/heatmap.npy" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/patches.py" beforeDir="false" afterPath="$PROJECT_DIR$/objects/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/objects/object_filtering.py" beforeDir="false" afterPath="$PROJECT_DIR$/objects/object_filtering.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/objects/object_matching.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/output/heatmap_small.npy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/objects/object_visualization.py" beforeDir="false" afterPath="$PROJECT_DIR$/objects/object_visualization.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/objects/polygon_features.py" beforeDir="false" afterPath="$PROJECT_DIR$/objects/polygon_features.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/patch_approach/main_patch.py" beforeDir="false" afterPath="$PROJECT_DIR$/patch_approach/main_patch.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/segmentation/mask_postprocess.py" beforeDir="false" afterPath="$PROJECT_DIR$/segmentation/mask_postprocess.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/segmentation/polygonize.py" beforeDir="false" afterPath="$PROJECT_DIR$/segmentation/polygonize.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/segmentation/sam_segment.py" beforeDir="false" afterPath="$PROJECT_DIR$/segmentation/sam_segment.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sinkhorn.py" beforeDir="false" afterPath="$PROJECT_DIR$/sinkhorn.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/cache_io.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cache_io.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/geometry.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/geometry.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/rasterize.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/rasterize.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,18 +61,18 @@
     <branch-grouping />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "jean-cq"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;jean-cq&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/jean-cq/Sinkhorn_for_change_detection.git",
-    "accountId": "b74de3ea-3819-4251-881a-8637cb51505e"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/jean-cq/Sinkhorn_for_change_detection.git&quot;,
+    &quot;accountId&quot;: &quot;b74de3ea-3819-4251-881a-8637cb51505e&quot;
   }
-}]]></component>
+}</component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -83,8 +89,21 @@
   "keyToString": {
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.evaluation.executor": "Run",
+    "Python.evaluation_object.executor": "Run",
+    "Python.evaluation_patch.executor": "Run",
+    "Python.geoai_inference.executor": "Run",
+    "Python.geoai_prepare_refs.executor": "Run",
+    "Python.geoai_run.executor": "Run",
+    "Python.geoai_vectorize.executor": "Run",
+    "Python.geoai_visualisation.executor": "Run",
     "Python.main.executor": "Run",
+    "Python.main_patch.executor": "Run",
+    "Python.object_visualization.executor": "Run",
+    "Python.patches.executor": "Run",
+    "Python.show_geoai_probability.executor": "Run",
     "Python.sinkhorn.executor": "Run",
+    "Python.visualisation_tif.executor": "Run",
     "RunOnceActivity.MCP Project settings loaded": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
@@ -129,7 +148,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774861521045</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Reorganisation of files and directories for approach change and archiving.">
+      <option name="closed" value="true" />
+      <created>1774868179326</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1774868179326</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -172,18 +199,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Add initial implementation for patch change detection and visualization" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add initial implementation for patch change detection and visualization" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/main.py</url>
-          <line>3</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="Reorganisation of files and directories for approach change and archiving." />
+    <option name="LAST_COMMIT_MESSAGE" value="Reorganisation of files and directories for approach change and archiving." />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>

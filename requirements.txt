@@ -4,3 +4,5 @@ rasterio
 torch
 torchvision
 opencv-python
+transformers
+geoai

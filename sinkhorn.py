@@ -383,3 +383,252 @@ def sinkhorn_patch_change(
         "F1_norm": F1n,
         "F2_norm": F2n,
     }
+# ============================================================
+# 4) Object-level cost helpers
+# ============================================================
+
+def standardize_rows(X: np.ndarray, eps: float = 1e-12) -> np.ndarray:
+    """
+    Column-wise standardization:
+      X_std = (X - mean) / std
+    Useful for shape / metadata vectors whose scales differ a lot.
+    """
+    X = np.asarray(X, dtype=np.float64)
+    mu = np.mean(X, axis=0, keepdims=True)
+    sd = np.std(X, axis=0, keepdims=True)
+    return (X - mu) / np.maximum(sd, eps)
+
+
+def make_object_cost(
+    XY1: np.ndarray,
+    XY2: np.ndarray,
+    F1: np.ndarray,
+    F2: np.ndarray,
+    S1: np.ndarray,
+    S2: np.ndarray,
+    *,
+    alpha: float = 1.0,
+    beta: float = 1.0,
+    gamma: float = 1.0,
+    gate_radius: float = 0.05,
+    gate_cost: float | None = None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Build object-level cost matrix
+
+      C = alpha * C_geo + beta * C_feat + gamma * C_shape
+
+    with gating based only on geometry.
+
+    Returns:
+      C, C_geo, C_feat, C_shape
+    """
+    C_geo = pairwise_sq_dists(XY1, XY2)
+    C_feat = pairwise_sq_dists(F1, F2)
+    C_shape = pairwise_sq_dists(S1, S2)
+
+    C = alpha * C_geo + beta * C_feat + gamma * C_shape
+
+    mask = C_geo > (gate_radius ** 2)
+
+    if gate_cost is None:
+        finite_vals = C[~mask]
+        if finite_vals.size == 0:
+            gate_cost = 50.0
+        else:
+            q = float(np.quantile(finite_vals, 0.99))
+            gate_cost = q + 10.0
+
+    C = np.where(mask, gate_cost, C)
+    return C, C_geo, C_feat, C_shape
+
+
+# ============================================================
+# 5) Object-level change scores
+# ============================================================
+
+def object_change_scores_expected_cost(
+    P: np.ndarray,
+    C: np.ndarray,
+    out_mass: np.ndarray,
+    eps: float = 1e-12,
+) -> np.ndarray:
+    """
+    Same idea as patch expected-cost score, but for objects.
+    """
+    P = np.asarray(P, dtype=np.float64)
+    C = np.asarray(C, dtype=np.float64)
+    out_mass = np.asarray(out_mass, dtype=np.float64)
+
+    numer = np.sum(P * C, axis=1)
+    denom = np.maximum(out_mass, eps)
+    return numer / denom
+
+
+def object_unmatched_score(
+    out_mass: np.ndarray,
+    *,
+    a: np.ndarray | None = None,
+    eps: float = 1e-12,
+) -> np.ndarray:
+    """
+    Same as patch unmatched score, but for objects.
+    """
+    out_mass = np.asarray(out_mass, dtype=np.float64)
+
+    if a is None:
+        denom = np.maximum(out_mass.max(), eps)
+        return 1.0 - np.clip(out_mass / denom, 0.0, 1.0)
+
+    a = np.asarray(a, dtype=np.float64)
+    frac = out_mass / np.maximum(a, eps)
+    return 1.0 - np.clip(frac, 0.0, 1.0)
+
+
+# ============================================================
+# 6) End-to-end: run object OT change detection
+# ============================================================
+
+def sinkhorn_object_change(
+    XY1: np.ndarray,
+    F1: np.ndarray,
+    S1: np.ndarray,
+    XY2: np.ndarray,
+    F2: np.ndarray,
+    S2: np.ndarray,
+    *,
+    # cost weights
+    alpha: float = 1.0,
+    beta: float = 1.0,
+    gamma: float = 1.0,
+    gate_radius: float = 0.03,
+    gate_cost: float | None = None,
+    # solver params
+    eps: float = 0.2,
+    tau_a: float = 0.5,
+    tau_b: float = 0.5,
+    n_iters: int = 500,
+    tol: float = 1e-6,
+    # preprocessing
+    normalize_xy_method: str = "unit_box",
+    l2norm_features: bool = True,
+    standardize_shape: bool = True,
+    # weights
+    a: np.ndarray | None = None,
+    b: np.ndarray | None = None,
+) -> dict:
+    """
+    Object-based OT change detection.
+
+    Inputs:
+      XY1, XY2 : object centroids / coordinates, shape (n,2), (m,2)
+      F1, F2   : object appearance features / embeddings
+      S1, S2   : object metadata / shape features
+
+    Cost:
+      C_ij = alpha ||x_i - y_j||^2
+           + beta  ||f_i - g_j||^2
+           + gamma ||s_i - s'_j||^2
+
+    Returns:
+      P, ot_cost, out_mass, in_mass,
+      score_expected_cost, score_unmatched,
+      C, C_geo, C_feat, C_shape,
+      normalized inputs
+    """
+    XY1 = np.asarray(XY1, dtype=np.float64)
+    XY2 = np.asarray(XY2, dtype=np.float64)
+    F1 = np.asarray(F1, dtype=np.float64)
+    F2 = np.asarray(F2, dtype=np.float64)
+    S1 = np.asarray(S1, dtype=np.float64)
+    S2 = np.asarray(S2, dtype=np.float64)
+
+    # --------------------------------------------------------
+    # normalize geometry
+    # --------------------------------------------------------
+    XY1n = normalize_xy(XY1, method=normalize_xy_method)
+    XY2n = normalize_xy(XY2, method=normalize_xy_method)
+
+    # --------------------------------------------------------
+    # normalize appearance features
+    # --------------------------------------------------------
+    if l2norm_features:
+        F1n = l2_normalize_rows(F1)
+        F2n = l2_normalize_rows(F2)
+    else:
+        F1n, F2n = F1, F2
+
+    # --------------------------------------------------------
+    # normalize shape/meta features
+    # --------------------------------------------------------
+    if standardize_shape:
+        S1n = standardize_rows(S1)
+        S2n = standardize_rows(S2)
+    else:
+        S1n, S2n = S1, S2
+
+    # --------------------------------------------------------
+    # weights
+    # --------------------------------------------------------
+    n = XY1n.shape[0]
+    m = XY2n.shape[0]
+
+    if a is None:
+        a = np.ones(n, dtype=np.float64)
+    if b is None:
+        b = np.ones(m, dtype=np.float64)
+
+    # --------------------------------------------------------
+    # cost matrix
+    # --------------------------------------------------------
+    C, C_geo, C_feat, C_shape = make_object_cost(
+        XY1n, XY2n, F1n, F2n, S1n, S2n,
+        alpha=alpha,
+        beta=beta,
+        gamma=gamma,
+        gate_radius=gate_radius,
+        gate_cost=gate_cost,
+    )
+
+    print(f"[INFO] Object OT problem size: {n} x {m} = {n * m:,}")
+
+    # --------------------------------------------------------
+    # solve unbalanced OT
+    # --------------------------------------------------------
+    solver = SinkhornOT(
+        eps=eps,
+        n_iters=n_iters,
+        tol=tol,
+        unbalanced=True,
+        tau_a=tau_a,
+        tau_b=tau_b,
+    )
+    P, ot_cost = solver.solve(a, b, C)
+
+    out_mass = P.sum(axis=1)
+    in_mass = P.sum(axis=0)
+
+    # --------------------------------------------------------
+    # scores
+    # --------------------------------------------------------
+    score_expected = object_change_scores_expected_cost(P, C, out_mass)
+    score_unmatch = object_unmatched_score(out_mass, a=a)
+
+    return {
+        "P": P,
+        "ot_cost": ot_cost,
+        "out_mass": out_mass,
+        "in_mass": in_mass,
+        "score_expected_cost": score_expected,
+        "score_unmatched": score_unmatch,
+        "C": C,
+        "C_geo": C_geo,
+        "C_feat": C_feat,
+        "C_shape": C_shape,
+        "XY1_norm": XY1n,
+        "XY2_norm": XY2n,
+        "F1_norm": F1n,
+        "F2_norm": F2n,
+        "S1_norm": S1n,
+        "S2_norm": S2n,
+    }

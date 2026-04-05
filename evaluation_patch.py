@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-PATCH_OT_PATH = "data/output/heatmap_small_0005.npy"
+PATCH_OT_PATH = "data/output/heatmap_Tengah_2020_MayJul__VS__Tengah_2020_MayJul.npy"
 GEOAI_PATCH_REF_PATH = "data/output/geoai_ref/geoai_prob_patchref.npy"
 
 OUT_DIR = Path("data/output/evaluation")
@@ -89,11 +89,11 @@ def main():
     np.save(OUT_DIR / "geoai_patch_ref_norm.npy", geoai_norm)
 
     fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-    axes[0].imshow(patch_norm, cmap="hot")
+    axes[0].imshow(patch_norm, cmap="YlOrRd")
     axes[0].set_title("Patch OT")
     axes[0].axis("off")
 
-    axes[1].imshow(geoai_norm, cmap="hot")
+    axes[1].imshow(geoai_norm, cmap="YlOrRd")
     axes[1].set_title("GeoAI Patch Ref")
     axes[1].axis("off")
 

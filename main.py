@@ -11,6 +11,8 @@ from segmentation.polygonize import masks_to_objects
 from objects.polygon_features import attach_object_features, stack_object_arrays
 from objects.object_filtering import filter_objects
 from objects.object_visualization import show_object_score_overlay
+from utils.auto_params import choose_object_params
+from utils.path_lib import build_run_names
 
 from utils.rasterize import rasterize_object_scores
 from utils.cache_io import save_npy, save_pickle, load_pickle
@@ -22,15 +24,43 @@ from transformers import pipeline
 
 USE_CACHE = True
 
-PATH1 = "data/raw/NUS_S2_RGB_2020_MayJul_small.tif"
-PATH2 = "data/raw/NUS_S2_RGB_2025_MayJul_small.tif"
+# PATH1 = "data/raw/NUS_S2_RGB_2020_MayJul_small.tif"
+# PATH2 = "data/raw/NUS_S2_RGB_2025_MayJul_small.tif"
+#
+# MASK_CACHE_1 = "data/cache/raw_masks_2020_small.pkl"
+# MASK_CACHE_2 = "data/cache/raw_masks_2025_small.pkl"
+# OBJ_CACHE_1 = "data/cache/objects_2020_small.pkl"
+# OBJ_CACHE_2 = "data/cache/objects_2025_small.pkl"
+# SCORE_MAP_PATH = "data/output/object_score_map_small_betahalf.npy"
+# PATH1 = "data/ideal/ideal_image_1.tif"
+# PATH2 = "data/ideal/ideal_image_2.tif"
+#
+# MASK_CACHE_1 = "data/cache/raw_masks_ideal_1.pkl"
+# MASK_CACHE_2 = "data/cache/raw_masks_ideal_2.pkl"
+# OBJ_CACHE_1 = "data/cache/objects_ideal_1.pkl"
+# OBJ_CACHE_2 = "data/cache/objects_ideal_2.pkl"
+# SCORE_MAP_PATH = "data/output/object_score_map_ideal.npy"
 
-MASK_CACHE_1 = "data/cache/raw_masks_2020_small.pkl"
-MASK_CACHE_2 = "data/cache/raw_masks_2025_small.pkl"
-OBJ_CACHE_1 = "data/cache/objects_2020_small.pkl"
-OBJ_CACHE_2 = "data/cache/objects_2025_small.pkl"
-SCORE_MAP_PATH = "data/output/object_score_map_small_betahalf.npy"
+PATH1 = "data/raw/Tengah_2020_MayJul.tif"
+PATH2 = "data/raw/Tengah_2025_MayJul.tif"
 
+paths = build_run_names(PATH1, PATH2)
+
+MASK_CACHE_1 = paths["mask_cache_1"]
+MASK_CACHE_2 = paths["mask_cache_2"]
+OBJ_CACHE_1 = paths["obj_cache_1"]
+OBJ_CACHE_2 = paths["obj_cache_2"]
+SCORE_MAP_PATH = paths["object_score_map"]
+
+def normalize01(x):
+    x = np.asarray(x, dtype=np.float32)
+    if x.size == 0:
+        return x
+    lo = np.min(x)
+    hi = np.max(x)
+    if hi - lo < 1e-12:
+        return np.zeros_like(x)
+    return (x - lo) / (hi - lo)
 
 def build_sam_generator():
     """
@@ -49,96 +79,6 @@ def build_sam_generator():
     )
     return generator
 
-#
-# def get_masks(image: np.ndarray, cache_path: str, sam_generator):
-#     if USE_CACHE:
-#         try:
-#             masks = load_pickle(cache_path)
-#             print(f"[INFO] Loaded cached masks from {cache_path}")
-#             return masks
-#         except FileNotFoundError:
-#             pass
-#
-#     masks = run_sam_segmentation(image, sam_generator)
-#
-#     if USE_CACHE:
-#         save_pickle(cache_path, masks)
-#         print(f"[INFO] Saved masks to {cache_path}")
-#
-#     return masks
-
-def get_masks_tiled(image: np.ndarray, cache_path: str, sam_generator):
-    if USE_CACHE:
-        try:
-            masks = load_pickle(cache_path)
-            print(f"[INFO] Loaded cached masks from {cache_path}")
-            return masks
-        except FileNotFoundError:
-            pass
-
-    masks = run_sam_segmentation_tiled(
-        image,
-        sam_generator,
-        tile_size=512,
-        overlap=64,
-        points_per_batch=32,
-        pred_iou_thresh=0.85,
-        stability_score_thresh=0.85,
-        mask_threshold=0.0,
-    )
-
-    if USE_CACHE:
-        save_pickle(cache_path, masks)
-        print(f"[INFO] Saved masks to {cache_path}")
-
-    return masks
-def get_masks_tiled_joint(
-    img1,
-    img2,
-    cache1,
-    cache2,
-    sam_generator,
-    use_cache=True,
-):
-    """
-    Joint tiled SAM with shared preprocessing + caching.
-    """
-
-    if use_cache:
-        try:
-            import pickle
-            with open(cache1, "rb") as f:
-                masks1 = pickle.load(f)
-            with open(cache2, "rb") as f:
-                masks2 = pickle.load(f)
-
-            print(f"[INFO] Loaded cached masks from {cache1}, {cache2}")
-            return masks1, masks2
-
-        except FileNotFoundError:
-            pass
-
-    # 🔥 run joint SAM
-    masks1, masks2 = run_sam_segmentation_tiled_joint(
-        img1,
-        img2,
-        sam_generator,
-        tile_size=512,
-        overlap=64,
-        points_per_batch=32,
-        pred_iou_thresh=0.85,
-        stability_score_thresh=0.85,
-        zero_threshold=0.6,
-        window_size=16,
-    )
-
-    save_pickle(cache1, masks1)
-    save_pickle(cache2, masks2)
-
-    print(f"[INFO] Saved masks to {cache1}, {cache2}")
-
-    return masks1, masks2
-
 def main():
     t0 = time.perf_counter()
 
@@ -148,6 +88,11 @@ def main():
 
     img1 = np.nan_to_num(img1, nan=0.0)
     img2 = np.nan_to_num(img2, nan=0.0)
+
+    params = choose_object_params(img1)
+
+    print("[INFO] Auto mode:", params["mode"])
+    print("[INFO] Auto params:", params)
 
     if img1.shape != img2.shape:
         raise ValueError(f"Shape mismatch: {img1.shape} vs {img2.shape}")
@@ -159,16 +104,21 @@ def main():
     # 2. Build SAM generator
     sam_generator = build_sam_generator()
 
-    # 3. Run SAM
-    # raw_masks1 = get_masks_tiled(img1, MASK_CACHE_1, sam_generator)
-    # raw_masks2 = get_masks_tiled(img2, MASK_CACHE_2, sam_generator)
-    raw_masks1, raw_masks2 = get_masks_tiled_joint(
+    # 3. Run SAM\
+    raw_masks1, raw_masks2 = run_sam_segmentation_tiled_joint(
         img1,
         img2,
-        MASK_CACHE_1,
-        MASK_CACHE_2,
         sam_generator,
+        tile_size=params["tile_size"],
+        overlap=params["overlap"],
+        points_per_batch=params["points_per_batch"],
+        pred_iou_thresh=params["pred_iou_thresh"],
+        stability_score_thresh=params["stability_score_thresh"],
+        zero_threshold=params["zero_threshold"],
+        window_size=params["window_size"],
     )
+    print("[DEBUG] raw_masks1:", len(raw_masks1))
+    print("[DEBUG] raw_masks2:", len(raw_masks2))
     t2 = time.perf_counter()
     print(f"[TIME] SAM segmentation: {t2 - t1:.3f}s")
     print(f"[INFO] Raw mask count T1: {len(raw_masks1)}")
@@ -178,26 +128,29 @@ def main():
     masks1 = postprocess_sam_masks(
         raw_masks1,
         image_shape=img1.shape[:2],
-        min_area=80,
-        max_area_ratio=0.10,
-        iou_threshold=0.85,
-        bbox_iou_threshold=0.2,
-        max_masks_after_sort=5000,
+        min_area=params["min_area"],
+        max_area_ratio=params["max_area_ratio"],
+        iou_threshold=params["iou_threshold"],
+        bbox_iou_threshold=params["bbox_iou_threshold"],
+        max_masks_after_sort=params["max_masks_after_sort"],
     )
 
     masks2 = postprocess_sam_masks(
         raw_masks2,
-        image_shape=img2.shape[:2],
-        min_area=80,
-        max_area_ratio=0.10,
-        iou_threshold=0.85,
-        bbox_iou_threshold=0.2,
-        max_masks_after_sort=5000,
+        image_shape=img1.shape[:2],
+        min_area=params["min_area"],
+        max_area_ratio=params["max_area_ratio"],
+        iou_threshold=params["iou_threshold"],
+        bbox_iou_threshold=params["bbox_iou_threshold"],
+        max_masks_after_sort=params["max_masks_after_sort"],
     )
+
     t3 = time.perf_counter()
     print(f"[TIME] Mask postprocessing: {t3 - t2:.3f}s")
     print(f"[INFO] Kept mask count T1: {len(masks1)}")
     print(f"[INFO] Kept mask count T2: {len(masks2)}")
+    print("[DEBUG] postprocessed masks1:", len(masks1))
+    print("[DEBUG] postprocessed masks2:", len(masks2))
 
     # 5. Convert masks to objects
     if USE_CACHE:
@@ -231,21 +184,30 @@ def main():
     objects1 = filter_objects(
         img1,
         objects1,
-        min_area=100.0,
-        max_zero_fraction=0.6,
+        min_area=0.0,
+        max_zero_fraction=params["max_zero_fraction"],
         min_sam_score=0.0,
     )
     objects2 = filter_objects(
         img2,
         objects2,
-        min_area=100.0,
-        max_zero_fraction=0.6,
+        min_area=0.0,#100.0
+        max_zero_fraction=params["max_zero_fraction"],
         min_sam_score=0.0,
     )
+
     if len(objects1) == 0 or len(objects2) == 0:
         print("[ERROR] No valid objects remain after filtering.")
         print(f"[ERROR] objects1={len(objects1)}, objects2={len(objects2)}")
         return
+    print("[DEBUG] objects1 after filter:", len(objects1))
+    print("[DEBUG] objects2 after filter:", len(objects2))
+
+    for i, obj in enumerate(objects1):
+        print(f"[OBJ1 after {i}] area={obj.get('area')}, bbox={obj.get('bbox')}, centroid={obj.get('centroid')}")
+
+    for i, obj in enumerate(objects2):
+        print(f"[OBJ2 after {i}] area={obj.get('area')}, bbox={obj.get('bbox')}, centroid={obj.get('centroid')}")
 
     t6 = time.perf_counter()
     print(f"[TIME] Object filtering: {t6 - t5:.3f}s")
@@ -287,33 +249,49 @@ def main():
         tol=1e-6,
     )
     print("[DEBUG] Any NaN in cost matrix?", np.isnan(result["C"]).any())
-    print("[DEBUG] score_expected_cost:", result["score_expected_cost"])
-
+    print("[DEBUG] score_expected_cost_src:", result["score_expected_cost_src"])
+    print("[DEBUG] score_expected_cost_tgt:", result["score_expected_cost_tgt"])
     t7 = time.perf_counter()
     print(f"[TIME] Sinkhorn OT: {t7 - t6:.3f}s")
     print(f"[INFO] Total OT cost: {result['ot_cost']:.6f}")
     print(f"[INFO] Cost matrix shape: {result['C'].shape}")
 
     # 10. Rasterize scores
-    # score_expected_cost is row-wise, so it corresponds to source objects1
-    raw_scores = result["score_expected_cost"].astype(np.float32)
-    scores_for_map = np.nan_to_num(raw_scores, nan=0.0, posinf=0.0, neginf=0.0)
-    # log compression
-    # scores_for_map = np.log1p(np.maximum(raw_scores, 0.0))
+    exp_src = np.nan_to_num(result["score_expected_cost_src"].astype(np.float32), nan=0.0, posinf=0.0, neginf=0.0)
+    unm_src = np.nan_to_num(result["score_unmatched_src"].astype(np.float32), nan=0.0, posinf=0.0, neginf=0.0)
 
+    exp_tgt = np.nan_to_num(result["score_expected_cost_tgt"].astype(np.float32), nan=0.0, posinf=0.0, neginf=0.0)
+    unm_tgt = np.nan_to_num(result["score_unmatched_tgt"].astype(np.float32), nan=0.0, posinf=0.0, neginf=0.0)
+
+    exp_src_n = normalize01(exp_src)
+    unm_src_n = normalize01(unm_src)
+    exp_tgt_n = normalize01(exp_tgt)
+    unm_tgt_n = normalize01(unm_tgt)
+
+    scores_for_map_src = np.maximum(exp_src_n, unm_src_n)
+    scores_for_map_tgt = np.maximum(exp_tgt_n, unm_tgt_n)
+    # log compression
+    # scores_for_map = np.log1p(np.maximum(raw_scores, 0.0)
     # sqrt compression
     # scores_for_map = np.sqrt(np.maximum(raw_scores, 0.0))
+    # area compression
     # areas = np.array([obj["area"] for obj in objects1], dtype=np.float32)
 
     # scores_for_map = raw_scores / np.sqrt(np.maximum(areas, 1.0))
 
-    score_map = rasterize_object_scores(
+    score_map_src = rasterize_object_scores(
         objects=objects1,
-        scores=scores_for_map,
+        scores=scores_for_map_src,
         image_shape=img1.shape[:2],
         fill_value=np.nan,
     )
-
+    score_map_tgt = rasterize_object_scores(
+        objects=objects2,
+        scores=scores_for_map_tgt,
+        image_shape=img1.shape[:2],
+        fill_value=np.nan,
+    )
+    score_map = np.fmax(score_map_src, score_map_tgt)
     save_npy(SCORE_MAP_PATH, score_map)
 
     t8 = time.perf_counter()
@@ -322,7 +300,7 @@ def main():
 
     # 11. Visualize
     plt.figure(figsize=(8, 8))
-    plt.imshow(score_map, cmap="hot")
+    plt.imshow(score_map, cmap="YlOrRd")
     plt.colorbar()
     plt.title("Object-based Change Heatmap")
     plt.axis("off")
@@ -332,7 +310,7 @@ def main():
         image=img1,
         score_map=score_map,
         title="Object-based Change Overlay",
-        cmap="hot",
+        cmap="YlOrRd",
         alpha=0.55,
     )
 

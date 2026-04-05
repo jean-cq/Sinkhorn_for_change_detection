@@ -5,7 +5,7 @@ import rasterio
 from rasterio.enums import Resampling
 
 
-OUT_DIR = Path("../data/output/geoai_ref")
+OUT_DIR = Path("../data/output/geoai_ref_ideal")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -72,13 +72,27 @@ def minmax_normalize(x: np.ndarray) -> np.ndarray:
     return np.nan_to_num(y, nan=0.0, posinf=0.0, neginf=0.0)
 
 
+# def prepare_geoai_references(
+#     rgb_image_path: str = "../data/raw/NUS_S2_RGB_2025_MayJul_small.tif",
+#     binary_mask_path: str = "../data/output/geoai_ref/binary_mask.tif",
+#     probability_mask_path: str = "../data/output/geoai_ref/probability_mask.tif",
+#     instance_masks_path: str = "../data/output/geoai_ref/instance_masks.tif",
+#     patch_size: int = 32,
+# ):
 def prepare_geoai_references(
-    rgb_image_path: str = "../data/raw/NUS_S2_RGB_2025_MayJul_small.tif",
-    binary_mask_path: str = "../data/output/geoai_ref/binary_mask.tif",
-    probability_mask_path: str = "../data/output/geoai_ref/probability_mask.tif",
-    instance_masks_path: str = "../data/output/geoai_ref/instance_masks.tif",
-    patch_size: int = 32,
+        rgb_image_path: str = "../data/ideal/ideal_image_1.tif",
+        binary_mask_path: str = "../data/output/geoai_ref_ideal/binary_mask.tif",
+        probability_mask_path: str = "../data/output/geoai_ref_ideal/probability_mask.tif",
+        instance_masks_path: str = "../data/output/geoai_ref_ideal/instance_masks.tif",
+        patch_size: int = 32,
+        out_dir: str = None,
 ):
+    if out_dir is None:
+        out_dir = Path(probability_mask_path).parent
+    else:
+        out_dir = Path(out_dir)
+
+    out_dir.mkdir(parents=True, exist_ok=True)
     rgb = load_rgb_for_display(rgb_image_path)
     H, W = rgb.shape[:2]
 
@@ -88,7 +102,7 @@ def prepare_geoai_references(
     instance_mask = load_raster_resampled(instance_masks_path, (H, W), nearest=True)
 
     # For object comparison, keep the instance raster itself
-    np.save(OUT_DIR / "geoai_instance_mask.npy", instance_mask.astype(np.float32))
+    np.save(out_dir / "geoai_instance_mask.npy", instance_mask.astype(np.float32))
 
     # Patch references
     binary_patch = raster_to_patch_grid(binary_mask, patch_size)
@@ -98,9 +112,9 @@ def prepare_geoai_references(
     instance_binary = (instance_mask > 0).astype(np.float32)
     instance_patch = raster_to_patch_grid(instance_binary, patch_size)
 
-    np.save(OUT_DIR / "geoai_binary_patchref.npy", binary_patch.astype(np.float32))
-    np.save(OUT_DIR / "geoai_prob_patchref.npy", prob_patch.astype(np.float32))
-    np.save(OUT_DIR / "geoai_instance_patchref.npy", instance_patch.astype(np.float32))
+    np.save(out_dir / "geoai_binary_patchref.npy", binary_patch.astype(np.float32))
+    np.save(out_dir / "geoai_prob_patchref.npy", prob_patch.astype(np.float32))
+    np.save(out_dir / "geoai_instance_patchref.npy", instance_patch.astype(np.float32))
 
     # Sanity-check overlay
     overlay = minmax_normalize(instance_binary)
@@ -110,7 +124,7 @@ def prepare_geoai_references(
     plt.axis("off")
     plt.title("GeoAI Instance Overlay")
     plt.tight_layout()
-    plt.savefig(OUT_DIR / "geoai_instance_overlay.png", dpi=200, bbox_inches="tight")
+    plt.savefig(out_dir / "geoai_instance_overlay.png", dpi=200, bbox_inches="tight")
     plt.close()
 
     print("[INFO] Saved:")

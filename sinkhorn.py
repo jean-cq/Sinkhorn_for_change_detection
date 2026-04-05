@@ -178,7 +178,6 @@ def build_candidate_cost(
         C[i, js] = alpha * geo + beta * feat
 
     return C
-# polygon size too big then cut them into regular smaller patch? otherwise sinkhorn cannot detect the small distribution change
 def make_gated_cost(
     XY1: np.ndarray,
     XY2: np.ndarray,
@@ -450,7 +449,7 @@ def make_object_cost(
 def object_change_scores_expected_cost(
     P: np.ndarray,
     C: np.ndarray,
-    out_mass: np.ndarray,
+    mass: np.ndarray,
     eps: float = 1e-12,
 ) -> np.ndarray:
     """
@@ -458,30 +457,45 @@ def object_change_scores_expected_cost(
     """
     P = np.asarray(P, dtype=np.float64)
     C = np.asarray(C, dtype=np.float64)
-    out_mass = np.asarray(out_mass, dtype=np.float64)
+    mass = np.asarray(mass, dtype=np.float64)
 
     numer = np.sum(P * C, axis=1)
-    denom = np.maximum(out_mass, eps)
+    denom = np.maximum(mass, eps)
+    return numer / denom
+def object_change_scores_expected_cost_tgt(
+    P: np.ndarray,
+    C: np.ndarray,
+    mass: np.ndarray,
+    eps: float = 1e-12,
+) -> np.ndarray:
+    """
+    Target-side expected transport cost, one score per target object.
+    """
+    P = np.asarray(P, dtype=np.float64)
+    C = np.asarray(C, dtype=np.float64)
+    mass = np.asarray(mass, dtype=np.float64)
+
+    numer = np.sum(P * C, axis=0)
+    denom = np.maximum(mass, eps)
     return numer / denom
 
-
 def object_unmatched_score(
-    out_mass: np.ndarray,
+    mass: np.ndarray,
     *,
-    a: np.ndarray | None = None,
+    weights: np.ndarray | None = None,
     eps: float = 1e-12,
 ) -> np.ndarray:
     """
     Same as patch unmatched score, but for objects.
     """
-    out_mass = np.asarray(out_mass, dtype=np.float64)
+    mass = np.asarray(mass, dtype=np.float64)
 
-    if a is None:
-        denom = np.maximum(out_mass.max(), eps)
-        return 1.0 - np.clip(out_mass / denom, 0.0, 1.0)
+    if weights is None:
+        denom = np.maximum(mass.max(), eps)
+        return 1.0 - np.clip(mass / denom, 0.0, 1.0)
 
-    a = np.asarray(a, dtype=np.float64)
-    frac = out_mass / np.maximum(a, eps)
+    weights = np.asarray(weights, dtype=np.float64)
+    frac = mass / np.maximum(weights, eps)
     return 1.0 - np.clip(frac, 0.0, 1.0)
 
 
@@ -612,15 +626,21 @@ def sinkhorn_object_change(
     # scores
     # --------------------------------------------------------
     score_expected = object_change_scores_expected_cost(P, C, out_mass)
-    score_unmatch = object_unmatched_score(out_mass, a=a)
+    score_unmatch = object_unmatched_score(out_mass, weights=a)
+
+    # target-side / bidirectional scores
+    score_expected_tgt = object_change_scores_expected_cost_tgt(P, C, in_mass)
+    score_unmatch_tgt = object_unmatched_score(in_mass, weights=b)
 
     return {
         "P": P,
         "ot_cost": ot_cost,
         "out_mass": out_mass,
         "in_mass": in_mass,
-        "score_expected_cost": score_expected,
-        "score_unmatched": score_unmatch,
+        "score_expected_cost_src": score_expected,
+        "score_unmatched_src": score_unmatch,
+        "score_expected_cost_tgt": score_expected_tgt,
+        "score_unmatched_tgt": score_unmatch_tgt,
         "C": C,
         "C_geo": C_geo,
         "C_feat": C_feat,

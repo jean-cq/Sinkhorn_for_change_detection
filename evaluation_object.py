@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-OBJECT_OT_RASTER_PATH = "data/output/object_score_map_small_betahalf.npy"
+OBJECT_OT_RASTER_PATH = "data/output/object_score_map_Tengah_2020_MayJul__VS__Tengah_2025_MayJul.npy"
 GEOAI_PATCH_REF_PATH = "data/output/geoai_ref/geoai_prob_patchref.npy"
 
 PATCH_SIZE = 32
@@ -112,11 +112,11 @@ def main():
     np.save(OUT_DIR / "geoai_patch_ref_for_object_norm.npy", geoai_norm)
 
     fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-    axes[0].imshow(object_norm, cmap="hot")
+    axes[0].imshow(object_norm, cmap="YlOrRd")
     axes[0].set_title("Object OT (patch-grid)")
     axes[0].axis("off")
 
-    axes[1].imshow(geoai_norm, cmap="hot")
+    axes[1].imshow(geoai_norm, cmap="YlOrRd")
     axes[1].set_title("GeoAI Patch Ref")
     axes[1].axis("off")
 

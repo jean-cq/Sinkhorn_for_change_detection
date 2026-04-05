@@ -2,7 +2,7 @@ import rasterio
 import matplotlib.pyplot as plt
 import numpy as np
 
-tif_path = "data/raw/NUS_S2_RGB_2025_MayJul.tif"
+tif_path = "data/ideal/ideal_image_1.tif"
 
 with rasterio.open(tif_path) as src:
     # Read first 3 bands

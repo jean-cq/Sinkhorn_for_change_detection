@@ -241,7 +241,11 @@ def run_sam_segmentation_tiled_joint(
     image2 = np.nan_to_num(image2, nan=0.0, posinf=0.0, neginf=0.0)
 
     H, W = image1.shape[:2]
-    windows = generate_tiles((H, W), tile_size=tile_size, overlap=overlap)
+
+    if tile_size is None:
+        windows = [(0, H, 0, W)]  # one full-image tile
+    else:
+        windows = generate_tiles((H, W), tile_size=tile_size, overlap=overlap)
 
     all_records1 = []
     all_records2 = []
@@ -339,7 +343,10 @@ def run_sam_segmentation_tiled(
     img_uint8 = normalize_rgb_for_sam(image)
     H, W = img_uint8.shape[:2]
 
-    windows = generate_tiles((H, W), tile_size=tile_size, overlap=overlap)
+    if tile_size is None:
+        windows = [(0, H, 0, W)]  # one full-image tile
+    else:
+        windows = generate_tiles((H, W), tile_size=tile_size, overlap=overlap)
     all_records = []
 
     for tile_id, (y0, y1, x0, x1) in enumerate(windows):

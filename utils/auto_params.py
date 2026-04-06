@@ -11,15 +11,13 @@ def choose_patch_size(H, W, target_patches=1024, allowed_sizes=(4, 8, 16, 32, 64
             best = p
     return best
 
-
 def detect_image_mode(img: np.ndarray) -> str:
     frac_zero = np.mean(np.all(img == 0, axis=-1))
     if frac_zero > 0.7:
         return "ideal"
     return "satellite"
 
-
-def choose_object_params(img: np.ndarray):
+def choose_params(img: np.ndarray):
     H, W = img.shape[:2]
     mode = detect_image_mode(img)
 
@@ -40,6 +38,7 @@ def choose_object_params(img: np.ndarray):
             "max_masks_after_sort": 200,
             "max_zero_fraction": 0.2,
             "patch_size": choose_patch_size(H, W),
+            "fill_value": 0,
         }
 
     # satellite
@@ -62,4 +61,5 @@ def choose_object_params(img: np.ndarray):
         "max_masks_after_sort": 5000,
         "max_zero_fraction": 0.60,
         "patch_size": choose_patch_size(H, W),
+        "fill_value":np.nan,
     }

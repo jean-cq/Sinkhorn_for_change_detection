@@ -6,9 +6,19 @@ import matplotlib.pyplot as plt
 PATCH_OT_PATH = "data/output/heatmap_Tengah_2020_MayJul__VS__Tengah_2020_MayJul.npy"
 GEOAI_PATCH_REF_PATH = "data/output/geoai_ref/geoai_prob_patchref.npy"
 
+# PATCH_OT_PATH = "data/output/heatmap_ideal_image_1__VS__ideal_image_2.npy"
+# GEOAI_PATCH_REF_PATH = "data/output/geoai_ref_ideal/geoai_prob_patchref.npy"
+
 OUT_DIR = Path("data/output/evaluation")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
+def downsample_patch_grid(arr: np.ndarray, factor: int) -> np.ndarray:
+    H, W = arr.shape
+    if (H % factor == 0 and W % factor == 0):
+        arr = arr.reshape(H // factor, factor, W // factor, factor)
+        return arr.mean(axis=(1, 3))
+    else:
+        return arr
 
 def robust_normalize(x: np.ndarray, low: float = 1, high: float = 99) -> np.ndarray:
     x = np.asarray(x, dtype=np.float32)
@@ -66,7 +76,11 @@ def main():
 
     geoai_ref = np.load(GEOAI_PATCH_REF_PATH).astype(np.float32)
     geoai_ref = np.nan_to_num(geoai_ref, nan=0.0, posinf=0.0, neginf=0.0)
-
+    if patch_ot.shape != geoai_ref.shape:
+        factor_h = patch_ot.shape[0] // geoai_ref.shape[0]
+        factor_w = patch_ot.shape[1] // geoai_ref.shape[1]
+        assert factor_h == factor_w, "Non-square downsampling factor"
+        patch_ot = downsample_patch_grid(patch_ot, factor_h)
     patch_ot, geoai_ref = align_two(patch_ot, geoai_ref)
 
     print("patch_ot shape:", patch_ot.shape)
@@ -98,6 +112,7 @@ def main():
     axes[1].axis("off")
 
     plt.tight_layout()
+    # change the name of the output if you wanna try other graphs/output another comparison
     plt.savefig(OUT_DIR / "patch_vs_geoai_patchref.png", dpi=200, bbox_inches="tight")
     plt.show()
 

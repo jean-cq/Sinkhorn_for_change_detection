@@ -11,7 +11,7 @@ from segmentation.polygonize import masks_to_objects
 from objects.polygon_features import attach_object_features, stack_object_arrays
 from objects.object_filtering import filter_objects
 from objects.object_visualization import show_object_score_overlay
-from utils.auto_params import choose_object_params
+from utils.auto_params import choose_params
 from utils.path_lib import build_run_names
 
 from utils.rasterize import rasterize_object_scores
@@ -24,23 +24,8 @@ from transformers import pipeline
 
 USE_CACHE = True
 
-# PATH1 = "data/raw/NUS_S2_RGB_2020_MayJul_small.tif"
-# PATH2 = "data/raw/NUS_S2_RGB_2025_MayJul_small.tif"
-#
-# MASK_CACHE_1 = "data/cache/raw_masks_2020_small.pkl"
-# MASK_CACHE_2 = "data/cache/raw_masks_2025_small.pkl"
-# OBJ_CACHE_1 = "data/cache/objects_2020_small.pkl"
-# OBJ_CACHE_2 = "data/cache/objects_2025_small.pkl"
-# SCORE_MAP_PATH = "data/output/object_score_map_small_betahalf.npy"
 # PATH1 = "data/ideal/ideal_image_1.tif"
 # PATH2 = "data/ideal/ideal_image_2.tif"
-#
-# MASK_CACHE_1 = "data/cache/raw_masks_ideal_1.pkl"
-# MASK_CACHE_2 = "data/cache/raw_masks_ideal_2.pkl"
-# OBJ_CACHE_1 = "data/cache/objects_ideal_1.pkl"
-# OBJ_CACHE_2 = "data/cache/objects_ideal_2.pkl"
-# SCORE_MAP_PATH = "data/output/object_score_map_ideal.npy"
-
 PATH1 = "data/raw/Tengah_2020_MayJul.tif"
 PATH2 = "data/raw/Tengah_2025_MayJul.tif"
 
@@ -89,7 +74,7 @@ def main():
     img1 = np.nan_to_num(img1, nan=0.0)
     img2 = np.nan_to_num(img2, nan=0.0)
 
-    params = choose_object_params(img1)
+    params = choose_params(img1)
 
     print("[INFO] Auto mode:", params["mode"])
     print("[INFO] Auto params:", params)
@@ -104,7 +89,7 @@ def main():
     # 2. Build SAM generator
     sam_generator = build_sam_generator()
 
-    # 3. Run SAM\
+    # 3. Run SAM
     raw_masks1, raw_masks2 = run_sam_segmentation_tiled_joint(
         img1,
         img2,
@@ -117,8 +102,6 @@ def main():
         zero_threshold=params["zero_threshold"],
         window_size=params["window_size"],
     )
-    print("[DEBUG] raw_masks1:", len(raw_masks1))
-    print("[DEBUG] raw_masks2:", len(raw_masks2))
     t2 = time.perf_counter()
     print(f"[TIME] SAM segmentation: {t2 - t1:.3f}s")
     print(f"[INFO] Raw mask count T1: {len(raw_masks1)}")
@@ -149,8 +132,6 @@ def main():
     print(f"[TIME] Mask postprocessing: {t3 - t2:.3f}s")
     print(f"[INFO] Kept mask count T1: {len(masks1)}")
     print(f"[INFO] Kept mask count T2: {len(masks2)}")
-    print("[DEBUG] postprocessed masks1:", len(masks1))
-    print("[DEBUG] postprocessed masks2:", len(masks2))
 
     # 5. Convert masks to objects
     if USE_CACHE:
@@ -191,7 +172,7 @@ def main():
     objects2 = filter_objects(
         img2,
         objects2,
-        min_area=0.0,#100.0
+        min_area=0.0,
         max_zero_fraction=params["max_zero_fraction"],
         min_sam_score=0.0,
     )
@@ -200,14 +181,6 @@ def main():
         print("[ERROR] No valid objects remain after filtering.")
         print(f"[ERROR] objects1={len(objects1)}, objects2={len(objects2)}")
         return
-    print("[DEBUG] objects1 after filter:", len(objects1))
-    print("[DEBUG] objects2 after filter:", len(objects2))
-
-    for i, obj in enumerate(objects1):
-        print(f"[OBJ1 after {i}] area={obj.get('area')}, bbox={obj.get('bbox')}, centroid={obj.get('centroid')}")
-
-    for i, obj in enumerate(objects2):
-        print(f"[OBJ2 after {i}] area={obj.get('area')}, bbox={obj.get('bbox')}, centroid={obj.get('centroid')}")
 
     t6 = time.perf_counter()
     print(f"[TIME] Object filtering: {t6 - t5:.3f}s")
@@ -223,12 +196,7 @@ def main():
 
     print(f"[INFO] XY1 shape: {XY1.shape}, F1 shape: {F1.shape}, S1 shape: {S1.shape}")
     print(f"[INFO] XY2 shape: {XY2.shape}, F2 shape: {F2.shape}, S2 shape: {S2.shape}")
-    print("[DEBUG] Any NaN in XY1?", np.isnan(XY1).any())
-    print("[DEBUG] Any NaN in F1?", np.isnan(F1).any())
-    print("[DEBUG] Any NaN in S1?", np.isnan(S1).any())
-    print("[DEBUG] Any NaN in XY2?", np.isnan(XY2).any())
-    print("[DEBUG] Any NaN in F2?", np.isnan(F2).any())
-    print("[DEBUG] Any NaN in S2?", np.isnan(S2).any())
+
     if np.isnan(XY1).any() or np.isnan(F1).any() or np.isnan(S1).any():
         raise ValueError("NaN detected in source object features.")
     if np.isnan(XY2).any() or np.isnan(F2).any() or np.isnan(S2).any():
@@ -242,15 +210,14 @@ def main():
         gamma=1,
         gate_radius=0.15,
         gate_cost=1e6,
-        eps=0.0001,
+        # for ideal image test use eps=0.0001
+        # eps=0.0001,
+        eps=0.001,
         tau_a=0.5,
         tau_b=0.5,
         n_iters=500,
         tol=1e-6,
     )
-    print("[DEBUG] Any NaN in cost matrix?", np.isnan(result["C"]).any())
-    print("[DEBUG] score_expected_cost_src:", result["score_expected_cost_src"])
-    print("[DEBUG] score_expected_cost_tgt:", result["score_expected_cost_tgt"])
     t7 = time.perf_counter()
     print(f"[TIME] Sinkhorn OT: {t7 - t6:.3f}s")
     print(f"[INFO] Total OT cost: {result['ot_cost']:.6f}")
@@ -270,26 +237,17 @@ def main():
 
     scores_for_map_src = np.maximum(exp_src_n, unm_src_n)
     scores_for_map_tgt = np.maximum(exp_tgt_n, unm_tgt_n)
-    # log compression
-    # scores_for_map = np.log1p(np.maximum(raw_scores, 0.0)
-    # sqrt compression
-    # scores_for_map = np.sqrt(np.maximum(raw_scores, 0.0))
-    # area compression
-    # areas = np.array([obj["area"] for obj in objects1], dtype=np.float32)
-
-    # scores_for_map = raw_scores / np.sqrt(np.maximum(areas, 1.0))
-
     score_map_src = rasterize_object_scores(
         objects=objects1,
         scores=scores_for_map_src,
         image_shape=img1.shape[:2],
-        fill_value=np.nan,
+        fill_value=params["fill_value"],
     )
     score_map_tgt = rasterize_object_scores(
         objects=objects2,
         scores=scores_for_map_tgt,
         image_shape=img1.shape[:2],
-        fill_value=np.nan,
+        fill_value=params["fill_value"],
     )
     score_map = np.fmax(score_map_src, score_map_tgt)
     save_npy(SCORE_MAP_PATH, score_map)

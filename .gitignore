@@ -1,0 +1,4 @@
+.venv
+.idea
+git rm --cached path/to/file
+data/cache/objects_Tengah_2025_MayJul.pkl

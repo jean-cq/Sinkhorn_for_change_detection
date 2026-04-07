@@ -99,6 +99,7 @@ if __name__ == "__main__":
         patches1, XY1, patches2, XY2, zero_threshold=params["zero_threshold"]
     )
 
+    # uncomment the below (line 103) and comment the filter_bad_patches operation (line 98) for ideal image processing
     # keep_mask = np.ones(len(patches1), dtype=bool)
     t3 = time.perf_counter()
     print(f"[TIME] Patch filtering: {t3 - t2:.3f}s")

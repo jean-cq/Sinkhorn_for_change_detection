@@ -4,12 +4,15 @@ import matplotlib.pyplot as plt
 
 
 OBJECT_OT_RASTER_PATH = "data/output/object_score_map_Tengah_2020_MayJul__VS__Tengah_2025_MayJul.npy"
-GEOAI_PATCH_REF_PATH = "data/output/geoai_ref/geoai_prob_patchref.npy"
+GEOAI_PATCH_REF_PATH = "data/output/geoai_ref_Tengah_2020_MayJul__VS__Tengah_2025_MayJul/geoai_prob_patchref.npy"
 
 # OBJECT_OT_RASTER_PATH = "data/output/object_score_map_ideal_image_1__VS__ideal_image_2.npy"
-# GEOAI_PATCH_REF_PATH = "data/output/geoai_ref_ideal/geoai_prob_patchref.npy"
+# GEOAI_PATCH_REF_PATH = "data/output/geoai_ref_ideal_image_1__VS__ideal_image_2/geoai_prob_patchref.npy"
 
-PATCH_SIZE = 32
+# satellite patch
+PATCH_SIZE = 16
+# ideal patch
+# PATCH_SIZE = 8
 OUT_DIR = Path("data/output/evaluation")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 

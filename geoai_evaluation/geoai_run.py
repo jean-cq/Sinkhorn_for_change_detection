@@ -90,9 +90,8 @@ def run_geoai_change_detection(
 
 PATH1 = "../data/ideal/ideal_image_1.tif"
 PATH2 = "../data/ideal/ideal_image_2.tif"
-# PATH1 = "../data/raw/NUS_S2_RGB_2020_MayJul_small.tif"
-# PATH2 = "../data/raw/NUS_S2_RGB_2025_MayJul_small.tif"
-
+# PATH1 = "../data/raw/Tengah_2020_MayJul.tif"
+# PATH2 = "../data/raw/Tengah_2025_MayJul.tif"
 if __name__ == "__main__":
     outputs = run_geoai_change_detection(
         image_t1=PATH1,

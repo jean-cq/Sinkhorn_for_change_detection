@@ -5,10 +5,6 @@ import rasterio
 from rasterio.enums import Resampling
 
 
-OUT_DIR = Path("../data/output/geoai_ref_ideal")
-OUT_DIR.mkdir(parents=True, exist_ok=True)
-
-
 def load_rgb_for_display(image_path: str) -> np.ndarray:
     with rasterio.open(image_path) as src:
         rgb = src.read([1, 2, 3]).astype(np.float32)
@@ -71,14 +67,6 @@ def minmax_normalize(x: np.ndarray) -> np.ndarray:
     y = (x - xmin) / (xmax - xmin)
     return np.nan_to_num(y, nan=0.0, posinf=0.0, neginf=0.0)
 
-
-# def prepare_geoai_references(
-#     rgb_image_path: str = "../data/raw/NUS_S2_RGB_2025_MayJul_small.tif",
-#     binary_mask_path: str = "../data/output/geoai_ref/binary_mask.tif",
-#     probability_mask_path: str = "../data/output/geoai_ref/probability_mask.tif",
-#     instance_masks_path: str = "../data/output/geoai_ref/instance_masks.tif",
-#     patch_size: int = 32,
-# ):
 def prepare_geoai_references(
         rgb_image_path: str = "../data/ideal/ideal_image_1.tif",
         binary_mask_path: str = "../data/output/geoai_ref_ideal/binary_mask.tif",
@@ -133,7 +121,3 @@ def prepare_geoai_references(
     print(" - geoai_prob_patchref.npy")
     print(" - geoai_instance_patchref.npy")
     print(" - geoai_instance_overlay.png")
-
-
-if __name__ == "__main__":
-    prepare_geoai_references()

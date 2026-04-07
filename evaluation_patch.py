@@ -3,11 +3,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-PATCH_OT_PATH = "data/output/heatmap_Tengah_2020_MayJul__VS__Tengah_2020_MayJul.npy"
-GEOAI_PATCH_REF_PATH = "data/output/geoai_ref/geoai_prob_patchref.npy"
+# PATCH_OT_PATH = "data/output/heatmap_Tengah_2020_MayJul__VS__Tengah_2020_MayJul.npy"
+# GEOAI_PATCH_REF_PATH = "data/output/geoai_ref_Tengah_2020_MayJul__VS__Tengah_2025_MayJul/geoai_prob_patchref.npy"
 
-# PATCH_OT_PATH = "data/output/heatmap_ideal_image_1__VS__ideal_image_2.npy"
-# GEOAI_PATCH_REF_PATH = "data/output/geoai_ref_ideal/geoai_prob_patchref.npy"
+PATCH_OT_PATH = "data/output/heatmap_ideal_image_1__VS__ideal_image_2.npy"
+GEOAI_PATCH_REF_PATH = "data/output/geoai_ref_ideal_image_1__VS__ideal_image_2/geoai_prob_patchref.npy"
 
 OUT_DIR = Path("data/output/evaluation")
 OUT_DIR.mkdir(parents=True, exist_ok=True)

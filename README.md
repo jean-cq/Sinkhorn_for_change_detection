@@ -106,7 +106,7 @@ Example:
 ```python
 # for ideal image test use eps=0.0001
 # eps=0.0001,
-eps=0.001,
+eps=0.005,
 ```
 
 Use the value appropriate for your input setting.

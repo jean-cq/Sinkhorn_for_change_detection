@@ -212,7 +212,7 @@ def main():
         gate_cost=1e6,
         # for ideal image test use eps=0.0001
         # eps=0.0001,
-        eps=0.001,
+        eps=0.005,
         tau_a=0.5,
         tau_b=0.5,
         n_iters=500,
